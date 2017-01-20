@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import serial
+from serial import Serial
 import crc16
 from struct import pack, unpack
 
@@ -31,7 +31,7 @@ def oneRXTX(intAddress, strCmd):
 
 hexString = lambda byteString : " ".join(x.encode('hex') for x in byteString)
 
-ser = serial.Serial(
+ser = Serial(
     port='COM5',
     baudrate=9600,
     bytesize=8,
@@ -76,6 +76,7 @@ cmdInst = [
     "\x08\x11\x01", # Pa/100
     "\x08\x11\x02", # Pb/100
     "\x08\x11\x03", # Pc/100
+    "\x04\x00", # время
 ]
 for cmd in cmdList:
     oneRXTX(address,cmd)
@@ -88,6 +89,7 @@ def bytesToINT32(bytes):
         return int32
     else:
         return 0
+
 
 def int32struct(bytes):
     l1 = len(bytes)
@@ -105,7 +107,6 @@ for cmd in cmdList[5:]:
     checkOK, rs = oneRXTX(address,cmd)
     if checkOK:
         #bytesToINT32(rs[1:5])
-        #bytesToINT32(rs[9:13])
         int32struct(rs[1:][:-2])
 
 for cmd in cmdInst:
@@ -113,4 +114,8 @@ for cmd in cmdInst:
     if checkOK:
         int16struct(rs[2:][:-2])
 
+for i in xrange(10):
+    checkOK, rs = oneRXTX(address,cmdInst[-1])
+    if checkOK:
+        print hexString(rs[1:][:-2])
 ser.close()
