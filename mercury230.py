@@ -2,6 +2,7 @@
 from serial import Serial
 import crc16
 from struct import pack, unpack
+import sys
 
 #for debug
 #import sys
@@ -48,7 +49,11 @@ ser.write(getPowerCRC)
 response = ser.read(size=100)
 print "write: {}\nread:  {}".format(hexString(getPowerCRC),hexString(response))
 
-address = 176
+if len(sys.argv)==2:
+    address = int(sys.argv[1])
+else:
+    address = 176
+
 cmdList = [
     "\x00", #echo
     "\x01\x01\x01\x01\x01\x01\x01\x01", #set connection via password
