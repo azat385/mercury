@@ -8,7 +8,7 @@ from pymodbus.client.sync import ModbusTcpClient as ModbusClient
 from collections import namedtuple
 A = namedtuple('A', 'ip port id start_address')
 
-if len(sys.argv)==2:
+if len(sys.argv) >= 2:
     address = int(sys.argv[1])
     start_address = int(sys.argv[2])
 else:
@@ -119,6 +119,9 @@ def bytesRearrange(bytes):
     b = bytes[2]+bytes[3]+bytes[0]+bytes[1]
     return b
 
+#reset all data?
+ser.write('\x0f\x00\x00\x00')
+ser.read(size=100)
 
 for rr in rr_list:
     oneRXTX(address, rr)
