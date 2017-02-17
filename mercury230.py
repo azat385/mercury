@@ -52,7 +52,7 @@ def oneRXTX(intAddress, strCmd):
 #if __name__ == '__main__':
 
 ser = Serial(
-    port='COM5',
+    port='/dev/ttyUSB0',
     baudrate=9600,
     bytesize=8,
     parity='N',
