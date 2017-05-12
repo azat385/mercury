@@ -124,7 +124,8 @@ if __name__ == '__main__':
         xonxoff=0,
         rtscts=0
     )
-    for i in range(2):
+    trials = range(2)
+    for i in trials:
         logger.debug("trial {}".format(i))
 
         if not ser.is_open:
@@ -146,7 +147,8 @@ if __name__ == '__main__':
                                     name=d['name'] )
 
         ser.close()
-        sleep(20)
+        if i <> trials[-1]:
+            sleep(20)
 
     logger.debug("End process...")
 
