@@ -126,7 +126,9 @@ if __name__ == '__main__':
     )
     for i in range(2):
         logger.debug("trial {}".format(i))
-        ser.open()
+
+        if not ser.is_open:
+            ser.open()
 
         #reset all data?
         ser.write('\x0f\x00\x00\x00')
