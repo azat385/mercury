@@ -27,9 +27,6 @@ import sys
 from sql_create_table import Base, engine, Data, create_db_and_table
 from sqlalchemy.orm import sessionmaker
 
-# DBSession = sessionmaker(bind=engine)
-# session = DBSession()
-
 if len(sys.argv) >= 2:
     address = int(sys.argv[1])
 else:
@@ -135,6 +132,13 @@ if __name__ == '__main__':
         xonxoff=0,
         rtscts=0
     )
+    # connect to local db
+    DBSession = sessionmaker(bind=engine)
+    session = DBSession()
+    # create table if not exist
+    if not engine.dialect.has_table(engine, Data.__tablename__):
+        create_db_and_table()
+
     trials = range(2)
     for i in trials:
         logger.debug("trial {}".format(i))
@@ -160,11 +164,20 @@ if __name__ == '__main__':
                                     strTime=stime,
                 )
         ser.close()
-        print data
+        logger.debug("data to add db {}".format(data))
 
+        for d in data:
+            new_data = Data(tag_id=d[0],
+                            value=d[1],
+                            stime=d[2]
+                            )
+            session.add(new_data)
+            logger.debug("add data to db {}".format(new_data))
+        session.commit()
         if i <> trials[-1]:
             sleep(20)
 
+    session.close()
     logger.debug("End process...")
 
 
