@@ -176,7 +176,7 @@ if __name__ == '__main__':
         session.commit()
         if i <> trials[-1]:
             sleep(20)
-
+    logger.info("data table count = {}".format(session.query(Data).count()))
     session.close()
     logger.debug("End process...")
 
