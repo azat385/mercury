@@ -6,7 +6,7 @@ from logging.handlers import RotatingFileHandler
 # format the log entries
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
 
-handler = RotatingFileHandler('mc2db.log',
+handler = RotatingFileHandler('merc2db.log',
                               mode='a',
                               maxBytes=20*1024*1024,
                               backupCount=5,
@@ -55,7 +55,7 @@ def oneRXTX(intAddress, strCmd):
     else:
         crcCheck = "CRC BAD!!!"
         crcCheckOK = False
-    logger.debug("request:\t{}\nresponse:\t{}\n{}".format(hexString(rq),hexString(rs), crcCheck))
+    logger.debug("request:\t{}\tresponse:\t{}\t{}".format(hexString(rq),hexString(rs), crcCheck))
     return crcCheckOK, rs
 
 
