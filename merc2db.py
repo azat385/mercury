@@ -17,13 +17,14 @@ logger = logging.getLogger(__name__)
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
+from datetime import datetime
 from time import sleep
 from serial import Serial
 import crc16
 from struct import pack, unpack
 import sys
 
-from sql_create_table import Base, engine, Data
+from sql_create_table import Base, engine, Data, create_db_and_table
 from sqlalchemy.orm import sessionmaker
 
 # DBSession = sessionmaker(bind=engine)
@@ -53,6 +54,7 @@ def oneRXTX(intAddress, strCmd):
     rq = rq + convert(crc16.calcString(rq, crc16.INITIAL_MODBUS))[::-1]
     ser.write(rq)
     rs = ser.read(size=100)
+    str_tstamp = str(datetime.now())
     if convert(crc16.calcString(rs[:-2], crc16.INITIAL_MODBUS)) == rs[-2:][::-1]:
         crcCheck = "CRC OK"
         crcCheckOK = True
@@ -62,7 +64,7 @@ def oneRXTX(intAddress, strCmd):
         crcCheckOK = False
         logger_level = 30 # warning
     logger.log(level=logger_level, msg="request:\t{}\tresponse:\t{}\t{}".format(hexString(rq),hexString(rs), crcCheck))
-    return crcCheckOK, rs
+    return crcCheckOK, rs, str_tstamp
 
 rr_list = [
     "\x00", #echo
@@ -99,7 +101,7 @@ rq_dict = [
 ]
 
 
-def printAndAdd(bytes, rr_frame, name, ids):
+def printAndAdd(bytes, rr_frame, name, ids, strTime):
     if 'I' in rr_frame:
         l1 = len(bytes)
         if l1%4 == 0:
@@ -113,7 +115,7 @@ def printAndAdd(bytes, rr_frame, name, ids):
     id_value_array = []
     for id, v in zip(ids, values):
         if id <> doNotSave:
-            id_value_array.append([id, v])
+            id_value_array.append([id, v, strTime])
     return id_value_array
 
 # def bytesRearrange(bytes):
@@ -149,12 +151,13 @@ if __name__ == '__main__':
 
         data = []
         for d in rq_dict:
-            checkOK, rs = oneRXTX(address, d['rq'])
+            checkOK, rs, stime = oneRXTX(address, d['rq'])
             if checkOK:
                 data += printAndAdd(bytes=rs[d['pos']:][:-2],
                                     rr_frame=d['frame'],
                                     name=d['name'],
                                     ids=d['id'],
+                                    strTime=stime,
                 )
         ser.close()
         print data
