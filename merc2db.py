@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
+from time import sleep
 from serial import Serial
 import crc16
 from struct import pack, unpack
@@ -27,8 +28,6 @@ if len(sys.argv) >= 2:
     address = int(sys.argv[1])
 else:
     address = 176
-
-logger.debug("Starting process with mercury addr = {} ...".format(address))
 
 hexString = lambda byteString : " ".join(x.encode('hex') for x in byteString)
 
@@ -57,26 +56,6 @@ def oneRXTX(intAddress, strCmd):
         crcCheckOK = False
     logger.debug("request:\t{}\tresponse:\t{}\t{}".format(hexString(rq),hexString(rs), crcCheck))
     return crcCheckOK, rs
-
-
-#if __name__ == '__main__':
-
-ser = Serial(
-    port='/dev/ttyUSB0',
-    baudrate=9600,
-    bytesize=8,
-    parity='N',
-    stopbits=1,
-    timeout=0.5,
-    xonxoff=0,
-    rtscts=0
-)
-
-# sample rq&rs
-#getPowerCRC = "\xB0\x00\x74\x70"
-#ser.write(getPowerCRC)
-#response = ser.read(size=100)
-#print "write: {}\nread:  {}".format(hexString(getPowerCRC),hexString(response))
 
 rr_list = [
     "\x00", #echo
@@ -132,45 +111,41 @@ def bytesRearrange(bytes):
     b = bytes[2]+bytes[3]+bytes[0]+bytes[1]
     return b
 
-#reset all data?
-ser.write('\x0f\x00\x00\x00')
-ser.read(size=100)
+if __name__ == '__main__':
+    logger.debug("Starting process with mercury addr = {} ...".format(address))
 
-for rr in rr_list:
-    oneRXTX(address, rr)
+    ser = Serial(
+        port='/dev/ttyUSB0',
+        baudrate=9600,
+        bytesize=8,
+        parity='N',
+        stopbits=1,
+        timeout=0.5,
+        xonxoff=0,
+        rtscts=0
+    )
+    for i in range(2):
+        logger.debug("trial {}".format(i))
+        ser.open()
 
-data = ""
-for d in rq_dict:
-    checkOK, rs = oneRXTX(address,d['rq'])
-    if checkOK:
-        data += printAndAdd(bytes=rs[d['pos']:][:-2],
-                            rr_frame=d['frame'],
-                            name=d['name'] )
+        #reset all data?
+        ser.write('\x0f\x00\x00\x00')
+        ser.read(size=100)
 
-ser.close()
-logger.debug("End process...")
-'''
-print hexString(data)
-#data = [int(x.encode('hex'),16) for x in data]
-print data
-print len(data)
+        for rr in rr_list:
+            oneRXTX(address, rr)
 
-if not len(data)%2 == 0:
-    data += "\x00"
+        data = ""
+        for d in rq_dict:
+            checkOK, rs = oneRXTX(address,d['rq'])
+            if checkOK:
+                data += printAndAdd(bytes=rs[d['pos']:][:-2],
+                                    rr_frame=d['frame'],
+                                    name=d['name'] )
 
-print hexString(data)
-print len(data)
-data_list = []
-for i in range(0, len(data)-8, 2): # -8 is last time array
-    data_list.append(unpack("H", data[i:i+2])[0])
-#data_list = list(unpack("<()h".format(len(data)/2), data))
-print data_list
+        ser.close()
+        sleep(20)
 
-time_array = data[-8:]
-time_array = [int(x.encode('hex'),10) for x in time_array]
-data_list += time_array
-print "with time:",data_list
-'''
-
+    logger.debug("End process...")
 
 
