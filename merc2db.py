@@ -154,7 +154,7 @@ if __name__ == '__main__':
                 data += printAndAdd(bytes=rs[d['pos']:][:-2],
                                     rr_frame=d['frame'],
                                     name=d['name'],
-                                    id=d['id'],
+                                    ids=d['id'],
                 )
         ser.close()
         print data
