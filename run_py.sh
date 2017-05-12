@@ -1,4 +1,6 @@
 #!/bin/bash
 
 cd /home/pi/mercury
-python "$@"
+python $@
+
+#$@ is used to pass ALL arguments
