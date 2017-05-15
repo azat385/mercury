@@ -51,7 +51,7 @@ def oneRXTX(intAddress, strCmd):
     rq = rq + convert(crc16.calcString(rq, crc16.INITIAL_MODBUS))[::-1]
     ser.write(rq)
     rs = ser.read(size=100)
-    str_tstamp = str(datetime.now())
+    tstamp = datetime.now()
     if convert(crc16.calcString(rs[:-2], crc16.INITIAL_MODBUS)) == rs[-2:][::-1]:
         crcCheck = "CRC OK"
         crcCheckOK = True
@@ -61,7 +61,7 @@ def oneRXTX(intAddress, strCmd):
         crcCheckOK = False
         logger_level = 30 # warning
     logger.log(level=logger_level, msg="request:\t{}\tresponse:\t{}\t{}".format(hexString(rq),hexString(rs), crcCheck))
-    return crcCheckOK, rs, str_tstamp
+    return crcCheckOK, rs, tstamp
 
 rr_list = [
     "\x00", #echo
@@ -98,7 +98,7 @@ rq_dict = [
 ]
 
 
-def printAndAdd(bytes, rr_frame, name, ids, strTime):
+def printAndAdd(bytes, rr_frame, name, ids, timestamp):
     if 'I' in rr_frame:
         l1 = len(bytes)
         if l1%4 == 0:
@@ -112,7 +112,7 @@ def printAndAdd(bytes, rr_frame, name, ids, strTime):
     id_value_array = []
     for id, v in zip(ids, values):
         if id <> doNotSave:
-            id_value_array.append([id, v, strTime])
+            id_value_array.append([id, v, timestamp])
     return id_value_array
 
 # def bytesRearrange(bytes):
@@ -155,21 +155,21 @@ if __name__ == '__main__':
 
         data = []
         for d in rq_dict:
-            checkOK, rs, stime = oneRXTX(address, d['rq'])
+            checkOK, rs, ts = oneRXTX(address, d['rq'])
             if checkOK:
                 data += printAndAdd(bytes=rs[d['pos']:][:-2],
                                     rr_frame=d['frame'],
                                     name=d['name'],
                                     ids=d['id'],
-                                    strTime=stime,
-                )
+                                    timestamp=ts,
+                                    )
         ser.close()
         logger.debug("data to add db {}".format(data))
 
         for d in data:
             new_data = Data(tag_id=d[0],
                             value=d[1],
-                            stime=d[2]
+                            ts=d[2]
                             )
             session.add(new_data)
             logger.debug("add data to db {}".format(new_data))

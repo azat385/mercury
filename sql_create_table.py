@@ -1,9 +1,9 @@
 from sqlalchemy import create_engine
-from sqlalchemy import Column, Integer, String, ForeignKey, REAL
+from sqlalchemy import Column, Integer, String, ForeignKey, REAL, DATETIME
 #from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
-db_name = "common.db"
+db_name = "common_ts.db"
 Base = declarative_base()
 
 
@@ -12,10 +12,10 @@ class Data(Base):
     id = Column(Integer, primary_key=True)
     tag_id = Column(Integer, nullable=False, default=999)
     value = Column(REAL)
-    stime = Column(String(30))
+    ts = Column(DATETIME)
 
     def __repr__(self):
-        return "<Data(id='{}', tag='{}' value='{} stime={}' )>".format(
+        return "<Data(id='{}', tag_id='{}' value='{}' timestamp='{}' )>".format(
             self.id,  self.tag_id, self.value, self.stime)
 
 
