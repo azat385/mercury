@@ -15,7 +15,7 @@ class Data(Base):
     ts = Column(DATETIME)
 
     def __repr__(self):
-        return "<Data(id='{}', tag_id='{}' value='{}' timestamp='{}' )>".format(
+        return "<Data(id='{}', tag_id='{}' value='{}' ts='{}' )>".format(
             self.id,  self.tag_id, self.value, self.ts)
 
 
