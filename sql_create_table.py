@@ -16,7 +16,7 @@ class Data(Base):
 
     def __repr__(self):
         return "<Data(id='{}', tag_id='{}' value='{}' timestamp='{}' )>".format(
-            self.id,  self.tag_id, self.value, self.stime)
+            self.id,  self.tag_id, self.value, self.ts)
 
 
 engine = create_engine('sqlite:///{}'.format(db_name), echo=False)
